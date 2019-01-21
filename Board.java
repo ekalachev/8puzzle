@@ -4,6 +4,8 @@
  *  Description:
  **************************************************************************** */
 
+import java.util.Arrays;
+
 public class Board {
     private final int[] pazzle;
     private int dimensionLength;
@@ -25,6 +27,13 @@ public class Board {
         }
     }
 
+    private Board(int[] pazzle) {
+        this.pazzle = new int[pazzle.length];
+        for (int i = 0; i < pazzle.length; i++) {
+            this.pazzle[i] = pazzle[i];
+        }
+    }
+
     // board dimension n
     public int dimension() {
         return dimensionLength;
@@ -35,7 +44,7 @@ public class Board {
         int hammingCount = 0;
 
         for (int i = 0; i < pazzle.length; i++) {
-            if (pazzle[i] != i + 1 && pazzle[i] != 0) {
+            if (pazzle[i] != i + 1 && pazzle[i] != zero) {
                 hammingCount++;
             }
         }
@@ -59,8 +68,7 @@ public class Board {
             int x = neededPosotion[0] - currentPosotion[0];
             int y = neededPosotion[1] - currentPosotion[1];
 
-            manhattanCount += (x < 0 ? x * -1 : x)
-                    + (y < 0 ? y * -1 : y);
+            manhattanCount += Math.abs(x) + Math.abs(y);
         }
 
         return manhattanCount;
@@ -80,22 +88,26 @@ public class Board {
 
     // a board that is obtained by exchanging any pair of blocks
     public Board twin() {
-        int[][] blocks = new int[dimensionLength][dimensionLength];
-        int pazzleIndex = 0;
-        boolean twined = false;
+        Board twin = new Board(this.pazzle);
 
-        for (int y = 0; y < dimensionLength; y++) {
-            for (int x = 0; x < dimensionLength; x++) {
-                int block = pazzle[pazzleIndex++];
-                blocks[y][x] = block;
+        for (int i = 0; i < this.pazzle.length; i++) {
+            int nextIndex = i + 1;
+            if (this.pazzle[i] != zero
+                    && nextIndex < this.pazzle.length
+                    && this.pazzle[nextIndex] != zero) {
 
-                if (!twined && block != zero &&) {
-                    twined = true;
-                }
+                exch(twin, i, i + 1);
+                break;
             }
         }
 
-        return new Board(blocks);
+        return twin;
+    }
+
+    private void exch(Board board, int i, int j) {
+        int tmp = board.pazzle[i];
+        board.pazzle[i] = board.pazzle[j];
+        board.pazzle[j] = tmp;
     }
 
     // does this board equal y?
@@ -108,16 +120,7 @@ public class Board {
         if (this.dimension() != that.dimension())
             return false;
 
-        boolean areEquals = true;
-
-        for (int i = 0; i < this.pazzle.length; i++) {
-            if (this.pazzle[i] != that.pazzle[i]) {
-                areEquals = false;
-                break;
-            }
-        }
-
-        return areEquals;
+        return Arrays.equals(this.pazzle, that.pazzle);
     }
 
     // all neighboring boards
