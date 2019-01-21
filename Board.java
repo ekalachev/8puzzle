@@ -32,10 +32,45 @@ public class Board {
 
     // number of blocks out of place
     public int hamming() {
+        int hammingCount = 0;
+
+        for (int i = 0; i < pazzle.length; i++) {
+            if (pazzle[i] != i + 1 && pazzle[i] != 0) {
+                hammingCount++;
+            }
+        }
+
+        return hammingCount;
     }
 
     // sum of Manhattan distances between blocks and goal
     public int manhattan() {
+        int manhattanCount = 0;
+
+        for (int i = 0; i < pazzle.length; i++) {
+            int block = pazzle[i];
+
+            if (block == zero)
+                continue;
+
+            int[] currentPosotion = position(i);
+            int[] neededPosotion = position(block);
+
+            int x = neededPosotion[0] - currentPosotion[0];
+            int y = neededPosotion[1] - currentPosotion[1];
+
+            manhattanCount += (x < 0 ? x * -1 : x)
+                    + (y < 0 ? y * -1 : y);
+        }
+
+        return manhattanCount;
+    }
+
+    private int[] position(int num) {
+        int xPosition = (num - 1) / dimensionLength;
+        int yPosition = (num - 1) % dimensionLength;
+
+        return new int[] { xPosition, yPosition };
     }
 
     // is this board the goal board?
@@ -45,6 +80,22 @@ public class Board {
 
     // a board that is obtained by exchanging any pair of blocks
     public Board twin() {
+        int[][] blocks = new int[dimensionLength][dimensionLength];
+        int pazzleIndex = 0;
+        boolean twined = false;
+
+        for (int y = 0; y < dimensionLength; y++) {
+            for (int x = 0; x < dimensionLength; x++) {
+                int block = pazzle[pazzleIndex++];
+                blocks[y][x] = block;
+
+                if (!twined && block != zero &&) {
+                    twined = true;
+                }
+            }
+        }
+
+        return new Board(blocks);
     }
 
     // does this board equal y?
