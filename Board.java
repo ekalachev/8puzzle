@@ -1,8 +1,13 @@
-/* *****************************************************************************
- *  Name:
- *  Date:
- *  Description:
- **************************************************************************** */
+/******************************************************************************
+ *  Compilation:  javac Board.java
+ *  Execution:    java Board
+ *  Dependencies: java.util.Arrays, edu.princeton.cs.algs4.Queue
+ *
+ *  8 Pazzle Board
+ *
+ ******************************************************************************/
+
+import edu.princeton.cs.algs4.Queue;
 
 import java.util.Arrays;
 
@@ -74,6 +79,7 @@ public class Board {
         return manhattanCount;
     }
 
+    // returns XY position
     private int[] position(int num) {
         int xPosition = (num - 1) / dimensionLength;
         int yPosition = (num - 1) % dimensionLength;
@@ -104,6 +110,7 @@ public class Board {
         return twin;
     }
 
+    // exchanges two points of Board array
     private void exch(Board board, int i, int j) {
         int tmp = board.pazzle[i];
         board.pazzle[i] = board.pazzle[j];
@@ -125,6 +132,46 @@ public class Board {
 
     // all neighboring boards
     public Iterable<Board> neighbors() {
+        int zeroIndex = 0;
+        boolean zeroIndexFound = false;
+
+        for (int i = 0; i < pazzle.length; i++) {
+            if (pazzle[i] == zero) {
+                zeroIndex = i;
+                zeroIndexFound = true;
+                break;
+            }
+        }
+
+        if (!zeroIndexFound) {
+            return null;
+        }
+
+        Queue<Board> neighbors = new Queue<Board>();
+
+        // not upper row
+        if (zeroIndex / dimensionLength > 0)
+            addNeighbor(neighbors, zeroIndex, zeroIndex - dimensionLength);
+
+        // not bottom row
+        if (zeroIndex / dimensionLength < dimensionLength - 1)
+            addNeighbor(neighbors, zeroIndex, zeroIndex + dimensionLength);
+
+        // not leftmost side
+        if (zeroIndex != 0 && zeroIndex % dimensionLength == 0)
+            addNeighbor(neighbors, zeroIndex, zeroIndex - 1);
+
+        // not rightmost side
+        if (zeroIndex + 1 % dimensionLength == 0)
+            addNeighbor(neighbors, zeroIndex, zeroIndex + 1);
+
+        return neighbors;
+    }
+
+    private void addNeighbor(Queue<Board> neighbors, int zeroIndex, int zeroNewPosition) {
+        Board neighbor = new Board(this.pazzle);
+        exch(neighbor, zeroIndex, zeroNewPosition);
+        neighbors.enqueue(neighbor);
     }
 
     // string representation of this board (in the output format specified below)
