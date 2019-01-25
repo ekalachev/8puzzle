@@ -11,7 +11,7 @@ import edu.princeton.cs.algs4.Queue;
 
 import java.util.Arrays;
 
-public class Board {
+public class Board implements Comparable<Board> {
     private final int[] pazzle;
     private int dimensionLength;
     private final int zero = 0;
@@ -32,11 +32,13 @@ public class Board {
         }
     }
 
-    private Board(int[] pazzle) {
+    private Board(int[] pazzle, int dimensionLength) {
         this.pazzle = new int[pazzle.length];
         for (int i = 0; i < pazzle.length; i++) {
             this.pazzle[i] = pazzle[i];
         }
+
+        this.dimensionLength = dimensionLength;
     }
 
     // board dimension n
@@ -67,11 +69,12 @@ public class Board {
             if (block == zero)
                 continue;
 
-            int[] currentPosotion = position(i);
+            // i + 1 needed because puzzle array count starts from 1
+            int[] currentPosotion = position(i + 1);
             int[] neededPosotion = position(block);
 
-            int x = neededPosotion[0] - currentPosotion[0];
-            int y = neededPosotion[1] - currentPosotion[1];
+            int x = currentPosotion[0] - neededPosotion[0];
+            int y = currentPosotion[1] - neededPosotion[1];
 
             manhattanCount += Math.abs(x) + Math.abs(y);
         }
@@ -81,8 +84,8 @@ public class Board {
 
     // returns XY position
     private int[] position(int num) {
-        int xPosition = (num - 1) / dimensionLength;
-        int yPosition = (num - 1) % dimensionLength;
+        int xPosition = (num - 1) % dimensionLength;
+        int yPosition = (num - 1) / dimensionLength;
 
         return new int[] { xPosition, yPosition };
     }
@@ -94,7 +97,7 @@ public class Board {
 
     // a board that is obtained by exchanging any pair of blocks
     public Board twin() {
-        Board twin = new Board(this.pazzle);
+        Board twin = new Board(this.pazzle, this.dimensionLength);
 
         for (int i = 0; i < this.pazzle.length; i++) {
             int nextIndex = i + 1;
@@ -149,27 +152,27 @@ public class Board {
 
         Queue<Board> neighbors = new Queue<Board>();
 
-        // not upper row
+        // has upper row
         if (zeroIndex / dimensionLength > 0)
             addNeighbor(neighbors, zeroIndex, zeroIndex - dimensionLength);
 
-        // not bottom row
+        // has bottom row
         if (zeroIndex / dimensionLength < dimensionLength - 1)
             addNeighbor(neighbors, zeroIndex, zeroIndex + dimensionLength);
 
-        // not leftmost side
-        if (zeroIndex != 0 && zeroIndex % dimensionLength == 0)
+        // has leftmost side
+        if (zeroIndex != 0 && zeroIndex % dimensionLength != 0)
             addNeighbor(neighbors, zeroIndex, zeroIndex - 1);
 
-        // not rightmost side
-        if (zeroIndex + 1 % dimensionLength == 0)
+        // has rightmost side
+        if ((zeroIndex + 1) % dimensionLength != 0)
             addNeighbor(neighbors, zeroIndex, zeroIndex + 1);
 
         return neighbors;
     }
 
     private void addNeighbor(Queue<Board> neighbors, int zeroIndex, int zeroNewPosition) {
-        Board neighbor = new Board(this.pazzle);
+        Board neighbor = new Board(this.pazzle, this.dimensionLength);
         exch(neighbor, zeroIndex, zeroNewPosition);
         neighbors.enqueue(neighbor);
     }
@@ -187,6 +190,11 @@ public class Board {
         }
 
         return result;
+    }
+
+    @Override
+    public int compareTo(Board that) {
+        return this.manhattan() - that.manhattan();
     }
 
     // unit tests (not graded)

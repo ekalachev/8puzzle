@@ -5,23 +5,52 @@
  **************************************************************************** */
 
 import edu.princeton.cs.algs4.In;
+import edu.princeton.cs.algs4.MinPQ;
+import edu.princeton.cs.algs4.Queue;
 import edu.princeton.cs.algs4.StdOut;
 
 public class Solver {
+    private final Queue<Board> result;
+    private Board min;
+
     // find a solution to the initial board (using the A* algorithm)
     public Solver(Board initial) {
+        if (initial == null)
+            throw new IllegalArgumentException();
+
+        MinPQ<Board> queue = new MinPQ<Board>(Board::compareTo);
+        queue.insert(initial);
+
+        min = queue.delMin();
+
+        result = new Queue<>();
+        result.enqueue(initial);
+
+        while (!min.isGoal()) {
+
+            for (Board b : min.neighbors()) {
+                if (result.size() == 0 || !result.peek().equals(b))
+                    queue.insert(b);
+            }
+
+            min = queue.delMin();
+            result.enqueue(min);
+        }
     }
 
     // is the initial board solvable?
     public boolean isSolvable() {
+        return min.isGoal();
     }
 
     // min number of moves to solve initial board; -1 if unsolvable
     public int moves() {
+        return result.isEmpty() ? -1 : result.size() - 1;
     }
 
     // sequence of boards in a shortest solution; null if unsolvable
     public Iterable<Board> solution() {
+        return result;
     }
 
     // solve a slider puzzle (given below)
