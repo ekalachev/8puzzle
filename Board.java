@@ -11,10 +11,10 @@ import edu.princeton.cs.algs4.Queue;
 
 import java.util.Arrays;
 
-public class Board implements Comparable<Board> {
+public class Board {
+    private static final int ZERO = 0;
     private final int[] pazzle;
-    private int dimensionLength;
-    private final int zero = 0;
+    private final int dimensionLength;
 
     // construct a board from an n-by-n array of blocks
     public Board(int[][] blocks) {
@@ -51,7 +51,7 @@ public class Board implements Comparable<Board> {
         int hammingCount = 0;
 
         for (int i = 0; i < pazzle.length; i++) {
-            if (pazzle[i] != i + 1 && pazzle[i] != zero) {
+            if (pazzle[i] != i + 1 && pazzle[i] != ZERO) {
                 hammingCount++;
             }
         }
@@ -66,7 +66,7 @@ public class Board implements Comparable<Board> {
         for (int i = 0; i < pazzle.length; i++) {
             int block = pazzle[i];
 
-            if (block == zero)
+            if (block == ZERO)
                 continue;
 
             // i + 1 needed because puzzle array count starts from 1
@@ -101,9 +101,9 @@ public class Board implements Comparable<Board> {
 
         for (int i = 0; i < this.pazzle.length; i++) {
             int nextIndex = i + 1;
-            if (this.pazzle[i] != zero
+            if (this.pazzle[i] != ZERO
                     && nextIndex < this.pazzle.length
-                    && this.pazzle[nextIndex] != zero) {
+                    && this.pazzle[nextIndex] != ZERO) {
 
                 exch(twin, i, i + 1);
                 break;
@@ -139,7 +139,7 @@ public class Board implements Comparable<Board> {
         boolean zeroIndexFound = false;
 
         for (int i = 0; i < pazzle.length; i++) {
-            if (pazzle[i] == zero) {
+            if (pazzle[i] == ZERO) {
                 zeroIndex = i;
                 zeroIndexFound = true;
                 break;
@@ -179,26 +179,18 @@ public class Board implements Comparable<Board> {
 
     // string representation of this board (in the output format specified below)
     public String toString() {
-        int index = 0;
-        String result = "";
+        StringBuilder result = new StringBuilder();
+        result
+                .append(this.dimensionLength)
+                .append("\n");
 
-        for (int i = 0; i < this.dimension(); i++) {
-            for (int j = 0; j < this.dimension(); j++) {
-                result += pazzle[index++];
-            }
-            result += "\r\n";
+        for (int i = 0; i < this.pazzle.length; i++) {
+            result.append(String.format("%2d ", this.pazzle[i]));
+
+            if ((i + 1) % this.dimensionLength == 0)
+                result.append("\n");
         }
 
-        return result;
-    }
-
-    @Override
-    public int compareTo(Board that) {
-        return this.manhattan() - that.manhattan();
-    }
-
-    // unit tests (not graded)
-    public static void main(String[] args) {
-
+        return result.toString();
     }
 }

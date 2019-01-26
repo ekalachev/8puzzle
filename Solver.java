@@ -1,56 +1,130 @@
-/* *****************************************************************************
- *  Name:
- *  Date:
- *  Description:
- **************************************************************************** */
+/******************************************************************************
+ *  Compilation:  javac Board.java
+ *  Execution:    java Solver
+ *  Dependencies: java.util.Arrays, edu.princeton.cs.algs4.*
+ *
+ *  8 Pazzle Solver
+ *
+ ******************************************************************************/
 
 import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.MinPQ;
-import edu.princeton.cs.algs4.Queue;
+import edu.princeton.cs.algs4.Stack;
 import edu.princeton.cs.algs4.StdOut;
 
 public class Solver {
-    private final Queue<Board> result;
-    private Board min;
+    private final Node mainNode;
+    private final Node twinNode;
 
     // find a solution to the initial board (using the A* algorithm)
     public Solver(Board initial) {
         if (initial == null)
             throw new IllegalArgumentException();
 
-        MinPQ<Board> queue = new MinPQ<Board>(Board::compareTo);
-        queue.insert(initial);
+        int moves = 0;
+
+        twinNode = new Node(initial.twin(), moves, null);
+        Node min = new Node(initial, moves, null);
+
+        MinPQ<Node> queue = new MinPQ<Node>();
+        queue.insert(min);
+        queue.insert(twinNode);
 
         min = queue.delMin();
 
-        result = new Queue<>();
-        result.enqueue(initial);
-
         while (!min.isGoal()) {
+            moves = min.moves + 1;
 
             for (Board b : min.neighbors()) {
-                if (result.size() == 0 || !result.peek().equals(b))
-                    queue.insert(b);
+                Board previous = null;
+
+                if (min.previous != null) {
+                    previous = min.previous.getjBoard();
+                }
+
+                if (!b.equals(previous)) {
+                    Node node = new Node(b, moves, min);
+                    queue.insert(node);
+                }
             }
 
             min = queue.delMin();
-            result.enqueue(min);
         }
+
+        mainNode = min;
     }
 
     // is the initial board solvable?
     public boolean isSolvable() {
-        return min.isGoal();
+        Node firstNode = mainNode;
+
+        while (firstNode.previous != null) {
+            firstNode = firstNode.previous;
+        }
+
+        return !firstNode.getjBoard().equals(twinNode.getjBoard());
     }
 
     // min number of moves to solve initial board; -1 if unsolvable
     public int moves() {
-        return result.isEmpty() ? -1 : result.size() - 1;
+        return isSolvable() ? mainNode.moves : -1;
     }
 
     // sequence of boards in a shortest solution; null if unsolvable
     public Iterable<Board> solution() {
-        return result;
+        Node sequenceNode = mainNode;
+
+        if (isSolvable()) {
+            Stack<Board> solutionQueue = new Stack<Board>();
+
+            solutionQueue.push(sequenceNode.getjBoard());
+            while (sequenceNode.previous != null) {
+                sequenceNode = sequenceNode.previous;
+                solutionQueue.push(sequenceNode.getjBoard());
+            }
+            return solutionQueue;
+        }
+        else
+            return null;
+    }
+
+    private class Node implements Comparable<Node> {
+        private final Node previous;
+        private final Board board;
+        private final int moves;
+
+        public Node(Board board, int moves, Node previous) {
+            this.board = board;
+            this.moves = moves;
+            this.previous = previous;
+        }
+
+        public Board getjBoard() {
+            return board;
+        }
+
+        public boolean isGoal() {
+            return board.isGoal();
+        }
+
+        public Iterable<Board> neighbors() {
+            return board.neighbors();
+        }
+
+        // add moves to simple manhattan
+        public int heuristic() {
+            return board.manhattan() + moves;
+        }
+
+        @Override
+        public int compareTo(Node that) {
+            return this.heuristic() - that.heuristic();
+        }
+
+        @Override
+        public String toString() {
+            return board.toString();
+        }
     }
 
     // solve a slider puzzle (given below)
